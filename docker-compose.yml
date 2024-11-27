@@ -5,26 +5,23 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:80" # Mapear el puerto del contenedor al puerto local
+      - "3000:80" 
     restart: always
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
     ports:
-      - "8000:8000" # Mapear el puerto del backend
-    volumes:
-      - ./backend:/app # Sincronizar archivos locales
-    environment:
-      - DATABASE_URL=mongodb://database:27017/scripts_db
-    restart: always
-
-  database:
+      - "8000:8000"
+    depends_on:
+      - db
+  db:
     image: mongo:latest
-    container_name: mongodb
+    container_name: mongo_db
     ports:
       - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=adminpassword
     volumes:
-      - ./database:/data/db
-    restart: always
+      - ./data/db:/data/db

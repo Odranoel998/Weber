@@ -1,20 +1,18 @@
-# Usar Python 3.9 como base
-FROM python:3.9-slim
+# Usamos la imagen oficial de Python
+FROM python:3.10
 
-# Establecer el directorio de trabajo
+# Establecemos el directorio de trabajo
 WORKDIR /app
 
-# Copiar las dependencias primero
-COPY requirements.txt .
+# Copiamos los archivos de la aplicación
+COPY . /app
 
-# Instalar las dependencias
-RUN pip install --no-cache-dir -r requirements.txt
+# Instalamos las dependencias
+RUN pip install -r requirements.txt
 
-# Copiar el resto del código de la aplicación
-COPY . .
-
-# Exponer el puerto para FastAPI
+# Exponemos el puerto que FastAPI usará
 EXPOSE 8000
 
-# Comando por defecto para iniciar FastAPI
-CMD ["uvicorn", "man:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Comando para ejecutar la aplicación
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
