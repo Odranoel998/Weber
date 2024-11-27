@@ -14,40 +14,30 @@ export const Header = () => {
           } transition-colors duration-300`
         }
       >
-        Dashboard
+        FormScripts
       </NavLink>
       
+      
       <NavLink
-        to="/Calendar"
+        to="/listscripts"
         className={({ isActive }) =>
           `text-left py-2 px-4 w-full rounded-md ${
             isActive ? "bg-gray-700" : "hover:bg-gray-700"
           } transition-colors duration-300`
         }
       >
-        Calendar
+        ListScripts
       </NavLink>
       
       <NavLink
-        to="/Employees"
+        to="/search"
         className={({ isActive }) =>
           `text-left py-2 px-4 w-full rounded-md ${
             isActive ? "bg-gray-700" : "hover:bg-gray-700"
           } transition-colors duration-300`
         }
       >
-        Employees
-      </NavLink>
-      
-      <NavLink
-        to="/Reports"
-        className={({ isActive }) =>
-          `text-left py-2 px-4 w-full rounded-md ${
-            isActive ? "bg-gray-700" : "hover:bg-gray-700"
-          } transition-colors duration-300`
-        }
-      >
-        Reports
+        Search
       </NavLink>
     </div>
   );

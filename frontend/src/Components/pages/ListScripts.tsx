@@ -29,7 +29,7 @@ export const ListScripts = () => {
 
   return (
     <div>
-      <h2>Scripts</h2>
+      <h1>ListScripts</h1>
       {/* <ul>
         {scripts.map((script) => (
           <li key={script._id}>

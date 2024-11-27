@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80" # Mapear el puerto del contenedor al puerto local
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000" # Mapear el puerto del backend
+    volumes:
+      - ./backend:/app # Sincronizar archivos locales
+    environment:
+      - DATABASE_URL=mongodb://database:27017/scripts_db
+    restart: always
+
+  database:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./database:/data/db
+    restart: always
