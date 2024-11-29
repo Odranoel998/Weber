@@ -16,7 +16,7 @@ services:
     depends_on:
       - db
   db:
-    image: mongo:latest
+    image: mongo
     container_name: mongo_db
     ports:
       - "27017:27017"
@@ -24,4 +24,4 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=adminpassword
     volumes:
-      - ./data/db:/data/db
+      - ./database/data/db:/data/db

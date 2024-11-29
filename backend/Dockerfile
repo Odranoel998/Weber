@@ -1,18 +1,32 @@
-# Usamos la imagen oficial de Python
-FROM python:3.10
+# Imagen base
+FROM python:3.11-slim
 
-# Establecemos el directorio de trabajo
+# Configurar el directorio de trabajo
 WORKDIR /app
 
-# Copiamos los archivos de la aplicación
-COPY . /app
+# Instalar dependencias del sistema necesarias para Python
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-venv \
+    && rm -rf /var/lib/apt/lists/*
 
-# Instalamos las dependencias
-RUN pip install -r requirements.txt
+# Crear el entorno virtual
+RUN python3 -m venv /opt/venv
 
-# Exponemos el puerto que FastAPI usará
+# Activar el entorno virtual y asegurarlo en PATH
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copiar el archivo de dependencias
+COPY requirements.txt .
+
+# Instalar las dependencias dentro del entorno virtual
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar el código fuente
+COPY . .
+
+# Exponer el puerto
 EXPOSE 8000
 
-# Comando para ejecutar la aplicación
+# Comando para ejecutar la app
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 

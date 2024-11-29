@@ -1,39 +1,47 @@
-from fastapi import FastAPI
-from fastapi import HTTPException
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
-from database import scripts_collection
+from pymongo import MongoClient
+from bson import ObjectId
+import os
 
 app = FastAPI()
 
-class Script(BaseModel):
+# Conexión a MongoDB
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:adminpassword@db:27017")
+client = MongoClient(MONGO_URI)
+db = client["weber_database"]
+scripts_collection = db["scripts"]
+
+# Modelo de Pydantic
+class ScriptModel(BaseModel):
     title: str
-    content: str
-    version: Optional[int] = 1 
-    
-fake_db = []
+    description: Optional[str] = None  # Ahora es opcional
 
-@app.get("/scripts")
-async def list_scripts():
-    return fake_db 
+    @classmethod
+    def from_mongo(cls, doc):
+        return cls(**doc)
 
-@app.post("/scripts")
-async def create_script(script: Script):
-    fake_db.append(script) 
-    return {"message": "Script created", "script": script}
+# Rutas
+@app.get("/scripts", response_model=List[ScriptModel])
+async def get_scripts():
+    documents = scripts_collection.find()
+    result = [ScriptModel.from_mongo(doc) for doc in documents]
+    return result
 
-@app.put("/scripts/{id}")
-async def update_script(id: int, script: Script):
-    if id >= len(fake_db):
-        raise HTTPException(status_code=404, detail="Script not found")
-    fake_db[id] = script
-    return {"message": "Script updated", "id": id, "script": script}
+@app.post("/scripts", response_model=ScriptModel)
+async def create_script(script: ScriptModel):
+    script_dict = script.dict(exclude={"id"})  # Excluir 'id' para evitar problemas al insertar
+    result = scripts_collection.insert_one(script_dict)
+    new_script = scripts_collection.find_one({"_id": result.inserted_id})
+    return ScriptModel.from_mongo(new_script)
 
-@app.delete("/scripts/{id}")
-async def delete_script(id: int):
-    if id >= len(fake_db):
-        raise HTTPException(status_code=404, detail="Script not found")
-    deleted_script = fake_db.pop(id)
-    return {"message": "Script deleted", "id": id, "script": deleted_script}
-
-
+@app.get("/scripts/{script_id}", response_model=ScriptModel)
+async def get_script(script_id: str):
+    try:
+        script = scripts_collection.find_one({"_id": ObjectId(script_id)})
+        if not script:
+            raise HTTPException(status_code=404, detail="Script not found")
+        return ScriptModel.from_mongo(script)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid script ID")
