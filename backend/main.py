@@ -6,42 +6,36 @@ from bson import ObjectId
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
-# Configuración de la app FastAPI
 app = FastAPI()
 
-# Permitir CORS para todos los orígenes (ajustable a tus necesidades)
 origins = [
-    "*",  # Permitir todas las solicitudes de cualquier origen
+    "*",  
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Permitir solicitudes de todos los orígenes
+    allow_origins=origins,  
     allow_credentials=True,
-    allow_methods=["*"],  # Permitir todos los métodos
-    allow_headers=["*"],  # Permitir todas las cabeceras
+    allow_methods=["*"],  
+    allow_headers=["*"], 
 )
 
-# Conexión a MongoDB
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://db:27017")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo_db:27017")
 client = MongoClient(MONGO_URI)
 db = client["weber_database"]
 scripts_collection = db["scripts"]
 
-# Modelo de datos para los scripts
 class ScriptModel(BaseModel):
-    id: Optional[str]  # ID generado por MongoDB
+    id: Optional[str]  
     title: str
-    description: Optional[str] = None  # Descripción opcional
+    description: Optional[str] = None  
 
-    # Método de clase para convertir un documento de MongoDB a un modelo Pydantic
     @classmethod
     def from_mongo(cls, doc):
-        # Convertimos el _id de MongoDB a string y lo asignamos al campo id
-        doc['id'] = str(doc['_id'])  # Convertir ObjectId a string
-        del doc['_id']  # Eliminar el _id original de MongoDB para evitar duplicación
+        doc['id'] = str(doc['_id'])  
+        del doc['_id']  
         return cls(**doc)
-# Rutas
+    
 @app.get("/scripts", response_model=List[ScriptModel])
 async def get_scripts():
     documents = scripts_collection.find()
@@ -50,10 +44,10 @@ async def get_scripts():
 
 @app.post("/scripts", response_model=ScriptModel)
 async def create_script(script: ScriptModel):
-    script_dict = script.dict(exclude={"id"})  # Excluir 'id' para evitar problemas al insertar
-    result = scripts_collection.insert_one(script_dict)  # MongoDB genera el _id automáticamente
-    new_script = scripts_collection.find_one({"_id": result.inserted_id})  # Recuperar el documento insertado
-    return ScriptModel.from_mongo(new_script)  # Convertir el documento a ScriptModel y devolverlo
+    script_dict = script.dict(exclude={"id"})  
+    result = scripts_collection.insert_one(script_dict)  
+    new_script = scripts_collection.find_one({"_id": result.inserted_id})  
+    return ScriptModel.from_mongo(new_script)  
 
 
 @app.get("/scripts/{script_id}", response_model=ScriptModel)
