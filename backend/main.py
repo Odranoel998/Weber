@@ -3,12 +3,27 @@ from pydantic import BaseModel
 from typing import List, Optional
 from pymongo import MongoClient
 from bson import ObjectId
+from fastapi.middleware.cors import CORSMiddleware
 import os
 
+# Configuración de la app FastAPI
 app = FastAPI()
 
+# Permitir CORS para todos los orígenes (ajustable a tus necesidades)
+origins = [
+    "*",  # Permitir todas las solicitudes de cualquier origen
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Permitir solicitudes de todos los orígenes
+    allow_credentials=True,
+    allow_methods=["*"],  # Permitir todos los métodos
+    allow_headers=["*"],  # Permitir todas las cabeceras
+)
+
 # Conexión a MongoDB
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:adminpassword@db:27017")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://db:27017")
 client = MongoClient(MONGO_URI)
 db = client["weber_database"]
 scripts_collection = db["scripts"]
